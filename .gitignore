@@ -1,1 +1,3 @@
 data/results/cp_results_fine_tuned.csv
+src/distilbert-base-uncased-finetuned-imdb
+src/bert.vocab
