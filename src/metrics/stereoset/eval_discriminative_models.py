@@ -13,9 +13,10 @@ from torch import nn
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import dataloader
-from intersentence_loader import IntersentenceDataset
-from models import models
+from metrics.stereoset.dataloader import *
+# from intersentence_loader import IntersentenceDataset
+# from models import models
+from metrics.stereoset.evaluation import *
 
 init()
 
@@ -72,8 +73,9 @@ class BiasEvaluator():
                  skip_intersentence=True, batch_size=1, max_seq_length=128, 
                  output_dir="predictions/", output_file="predictions.json"):
         print(f"Loading {input_file}...")
+        self.input_file = input_file
         filename = os.path.abspath(input_file)
-        self.dataloader = dataloader.StereoSet(filename)
+        self.dataloader = StereoSet(filename)
         self.cuda = not no_cuda
         self.device = "cuda" if self.cuda else "cpu"
 
@@ -85,9 +87,8 @@ class BiasEvaluator():
         self.INTERSENTENCE_LOAD_PATH = intersentence_load_path
 
         self.PRETRAINED_CLASS = pretrained_class
-        self.TOKENIZER = tokenizer
-        self.tokenizer = getattr(transformers, self.TOKENIZER).from_pretrained(
-            self.PRETRAINED_CLASS, padding_side="right")
+        # self.TOKENIZER = tokenizer
+        self.tokenizer = tokenizer
 
         # to keep padding consistent with the other models -> improves LM score.
         if self.tokenizer.__class__.__name__ == "XLNetTokenizer":
@@ -125,8 +126,9 @@ class BiasEvaluator():
         print("---------------------------------------------------------------")
 
     def evaluate_intrasentence(self):
-        model = getattr(models, self.INTRASENTENCE_MODEL)(
-            self.PRETRAINED_CLASS).to(self.device)
+        # model = getattr(models, self.INTRASENTENCE_MODEL)(
+        #     self.PRETRAINED_CLASS).to(self.device)
+        model = self.INTRASENTENCE_MODEL.to(self.device)
 
         if torch.cuda.device_count() > 1:
             print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -137,14 +139,14 @@ class BiasEvaluator():
         print(
             f"{Fore.LIGHTRED_EX}Evaluating bias on intrasentence tasks...{Style.RESET_ALL}")
 
-        if self.INTRASENTENCE_LOAD_PATH:
-            state_dict = torch.load(self.INTRASENTENCE_LOAD_PATH)
-            model.load_state_dict(state_dict)
+        # if self.INTRASENTENCE_LOAD_PATH:
+        #     state_dict = torch.load(self.INTRASENTENCE_LOAD_PATH)
+        #     model.load_state_dict(state_dict)
 
         pad_to_max_length = True if self.batch_size > 1 else False
-        dataset = dataloader.IntrasentenceLoader(self.tokenizer, max_seq_length=self.max_seq_length,
+        dataset = IntrasentenceLoader(self.tokenizer, max_seq_length=self.max_seq_length,
                                                  pad_to_max_length=pad_to_max_length, 
-                                                 input_file=args.input_file)
+                                                 input_file=self.input_file)
 
         loader = DataLoader(dataset, batch_size=self.batch_size)
         word_probabilities = defaultdict(list)
@@ -262,15 +264,37 @@ def process_job(batch, model, pretrained_class):
     return (pid, pscore)
 
 
-if __name__ == "__main__":
-    args = parse_args()
-    evaluator = BiasEvaluator(**vars(args))
-    results = evaluator.evaluate()
-    if args.output_file is not None:
-        output_file = args.output_file
-    else:
-        output_file = f"predictions_{args.pretrained_class}_{args.intersentence_model}_{args.intrasentence_model}.json"
+# if __name__ == "__main__":
+#     args = parse_args()
+#     evaluator = BiasEvaluator(**vars(args))
+#     results = evaluator.evaluate()
+#     if args.output_file is not None:
+#         output_file = args.output_file
+#     else:
+#         output_file = f"predictions_{args.pretrained_class}_{args.intersentence_model}_{args.intrasentence_model}.json"
 
-    output_file = os.path.join(args.output_dir, output_file)
+#     output_file = os.path.join(args.output_dir, output_file)
+#     with open(output_file, "w+") as f:
+#         json.dump(results, f, indent=2)
+
+
+def getStereoSet(**kwargs):
+    '''
+        pretrained_class =  'bert-base-cased', tokenizer = 'BertTokenizer', intrasentence_model =  'BertLM', input_file = None, output_dir = None 
+    '''
+    # args= parse_args()
+    print(kwargs)
+    # return
+    evaluator = BiasEvaluator(**kwargs)
+    results = evaluator.evaluate()
+    if kwargs['output_file'] is not None:
+        output_file = kwargs['output_file']
+    else:
+        output_file = 'stereoset_results.txt'
+        # output_file = f"predictions_{args.pretrained_class}_{args.intersentence_model}_{args.intrasentence_model}.json"
+
+    output_file = os.path.join(kwargs['output_dir'], output_file)
     with open(output_file, "w+") as f:
         json.dump(results, f, indent=2)
+
+    evaluate_results(kwargs['input_file'],output_file,kwargs['output_dir'])

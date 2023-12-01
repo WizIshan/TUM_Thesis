@@ -5,7 +5,7 @@ from collections import Counter, OrderedDict
 from argparse import ArgumentParser
 from collections import defaultdict
 import numpy as np
-import dataloader
+from metrics.stereoset.dataloader import *
 
 def parse_args():
     parser = ArgumentParser()
@@ -28,15 +28,16 @@ class ScoreEvaluator(object):
             - overall, a dictionary of composite scores for intersentence and intrasentence
         """
         # cluster ID, gold_label to sentence ID
-        stereoset = dataloader.StereoSet(gold_file_path) 
-        self.intersentence_examples = stereoset.get_intersentence_examples() 
+        stereoset = StereoSet(gold_file_path) 
+        # self.intersentence_examples = stereoset.get_intersentence_examples() 
         self.intrasentence_examples = stereoset.get_intrasentence_examples() 
         self.id2term = {}
         self.id2gold = {}
         self.id2score = {}
         self.example2sent = {}
-        self.domain2example = {"intersentence": defaultdict(lambda: []), 
-                               "intrasentence": defaultdict(lambda: [])}
+        # self.domain2example = {"intersentence": defaultdict(lambda: []), 
+        #                        "intrasentence": defaultdict(lambda: [])}
+        self.domain2example = {"intrasentence": defaultdict(lambda: [])}
 
         with open(predictions_file_path) as f:
             self.predictions = json.load(f)
@@ -48,25 +49,32 @@ class ScoreEvaluator(object):
                 self.example2sent[(example.ID, sentence.gold_label)] = sentence.ID
                 self.domain2example['intrasentence'][example.bias_type].append(example)
 
-        for example in self.intersentence_examples:
-            for sentence in example.sentences:
-                self.id2term[sentence.ID] = example.target
-                self.id2gold[sentence.ID] = sentence.gold_label
-                self.example2sent[(example.ID, sentence.gold_label)] = sentence.ID
-                self.domain2example['intersentence'][example.bias_type].append(example)
+        # for example in self.intersentence_examples:
+        #     for sentence in example.sentences:
+        #         self.id2term[sentence.ID] = example.target
+        #         self.id2gold[sentence.ID] = sentence.gold_label
+        #         self.example2sent[(example.ID, sentence.gold_label)] = sentence.ID
+        #         self.domain2example['intersentence'][example.bias_type].append(example)
 
-        for sent in self.predictions.get('intrasentence', []) + self.predictions.get('intersentence', []):
+        # for sent in self.predictions.get('intrasentence', []) + self.predictions.get('intersentence', []):
+        #     self.id2score[sent['id']] = sent['score']
+        for sent in self.predictions.get('intrasentence'):
             self.id2score[sent['id']] = sent['score']
 
         results = defaultdict(lambda: {})
 
-        for split in ['intrasentence', 'intersentence']:
+        # for split in ['intrasentence', 'intersentence']:
+        #     for domain in ['gender', 'profession', 'race', 'religion']:
+        #         results[split][domain] = self.evaluate(self.domain2example[split][domain])
+
+        for split in ['intrasentence']:
             for domain in ['gender', 'profession', 'race', 'religion']:
                 results[split][domain] = self.evaluate(self.domain2example[split][domain])
 
-        results['intersentence']['overall'] = self.evaluate(self.intersentence_examples) 
+        # results['intersentence']['overall'] = self.evaluate(self.intersentence_examples) 
         results['intrasentence']['overall'] = self.evaluate(self.intrasentence_examples) 
-        results['overall'] = self.evaluate(self.intersentence_examples + self.intrasentence_examples)
+        # results['overall'] = self.evaluate(self.intersentence_examples + self.intrasentence_examples)
+        results['overall'] = self.evaluate(self.intrasentence_examples)
         self.results = results
 
     def get_overall_results(self):
@@ -148,49 +156,47 @@ class ScoreEvaluator(object):
         return results
 
 
-def parse_file(gold_file, predictions_file):
+def evaluate_results(gold_file, predictions_file,predictions_dir):
     score_evaluator = ScoreEvaluator(
         gold_file_path=gold_file, predictions_file_path=predictions_file)
     overall = score_evaluator.get_overall_results()
     score_evaluator.pretty_print(overall)
 
-    if args.output_file:
-        output_file = args.output_file
-    elif args.predictions_dir!=None:
-        predictions_dir = args.predictions_dir
-        if predictions_dir[-1]=="/":
-            predictions_dir = predictions_dir[:-1]
-        output_file = f"{predictions_dir}.json"
-    else:
-        output_file = "results.json"
+    
+    # if predictions_dir!=None:
+    #     if predictions_dir[-1]=="/":
+    #         predictions_dir = predictions_dir[:-1]
+    #     output_file = f"{predictions_dir}.json"
+    # else:
+    #     output_file = "results.json"
 
-    if os.path.exists(output_file):
-        with open(output_file, "r") as f:
-            d = json.load(f)
-    else:
-        d = {}
-
+    # if os.path.exists(output_file):
+    #     with open(output_file, "r") as f:
+    #         d = json.load(f)
+    # else:
+    d = {}
+    output_file = os.path.join(predictions_dir, 'ss_results.txt')
     # assuming the file follows a format of "predictions_{MODELNAME}.json"
-    predictions_filename = os.path.basename(predictions_file)
-    if "predictions_" in predictions_filename: 
-        pretrained_class = predictions_filename.split("_")[1]
-        d[pretrained_class] = overall
-    else:
-        d = overall
+    # predictions_filename = os.path.basename(predictions_file)
+    # if "predictions_" in predictions_filename: 
+    #     pretrained_class = predictions_filename.split("_")[1]
+    #     d[pretrained_class] = overall
+    # else:
+    d = overall
 
     with open(output_file, "w+") as f:
         json.dump(d, f, indent=2)
 
-if __name__ == "__main__":
-    args = parse_args()
-    assert (args.predictions_file) != (args.predictions_dir)
-    if args.predictions_dir is not None:
-        predictions_dir = args.predictions_dir
-        if args.predictions_dir[-1]!="/":
-            predictions_dir = args.predictions_dir + "/"
-        for prediction_file in glob(predictions_dir + "*.json"): 
-            print()
-            print(f"Evaluating {prediction_file}...")
-            parse_file(args.gold_file, prediction_file) 
-    else:
-        parse_file(args.gold_file, args.predictions_file) 
+# if __name__ == "__main__":
+#     args = parse_args()
+#     assert (args.predictions_file) != (args.predictions_dir)
+#     if args.predictions_dir is not None:
+#         predictions_dir = args.predictions_dir
+#         if args.predictions_dir[-1]!="/":
+#             predictions_dir = args.predictions_dir + "/"
+#         for prediction_file in glob(predictions_dir + "*.json"): 
+#             print()
+#             print(f"Evaluating {prediction_file}...")
+#             parse_file(args.gold_file, prediction_file) 
+#     else:
+#         parse_file(args.gold_file, args.predictions_file) 
