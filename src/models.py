@@ -23,11 +23,12 @@ class FineTuner():
         self.model = None
         self.tokenizer = None
 
-        if(model_name == None):
+        if(self.model_checkpoint == None):
             print("No Model name specified!")
         else:
             self.model = self.__initialize_model__(from_local,local_model_path)
 
+        self.model_save_dir = model_save_dir
 
     def __initialize_model__(self,from_local,local_model_path):
 
@@ -43,6 +44,20 @@ class FineTuner():
             self.model = AutoModelForMaskedLM.from_pretrained(self.model_checkpoint)
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint)
         print("Model Initialized!")
+    
+    def getModel(self):
+
+        '''
+        Returns the loaded model
+        '''
+        return self.model
+
+    def getTokenizer(self):
+
+        '''
+        Returns the loaded Tokenizer
+        '''
+        return self.tokenizer
 
     def finetune_model(self):
 
