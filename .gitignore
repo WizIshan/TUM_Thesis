@@ -4,3 +4,4 @@ src/bert.vocab
 data
 *.pyc
 *.csv
+src/bert-base-cased-finetuned-imdb
