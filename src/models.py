@@ -19,6 +19,11 @@ from ft_datasets import FTDataset
 
 class FineTuner():
 
+    '''
+    This class is used to load pre-trained models and fine tune them on
+    the user provided dataset.
+    '''
+
     def __init__(self,model_name = None, from_local = False, local_model_path = None, model_save_dir = None):
 
         '''

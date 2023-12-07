@@ -17,7 +17,16 @@ import collections
 
 class FTDataset():
 
+    '''
+    This class is used to download datasets from HuggingFace and format them so that they
+    can be used for Fine Tuning Masked Language Models.
+    '''
+
     def __init__(self, dataset_name, model, tokenizer, train_size = 10_000):
+
+        '''
+        This function initiliazes the global variables for the class FTDataset
+        '''
         
         self.dataset_name = dataset_name
         self.model = model
@@ -26,6 +35,10 @@ class FTDataset():
     
 
     def tokenize_function(self,examples):
+
+        '''
+        Tokenizes the words in the dataset
+        '''
         result = self.tokenizer(examples["text"])
         if self.tokenizer.is_fast:
             result["word_ids"] = [result.word_ids(i) for i in range(len(result["input_ids"]))]
@@ -77,6 +90,10 @@ class FTDataset():
         return default_data_collator(features)
     
     def generate_dataset(self):
+
+        '''
+        Generates the formatted dataset to use for fine-tuning.
+        '''
 
         dataset = load_dataset(self.dataset_name)
 
