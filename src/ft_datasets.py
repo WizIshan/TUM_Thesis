@@ -39,6 +39,7 @@ class FTDataset():
         '''
         Tokenizes the words in the dataset
         '''
+
         result = self.tokenizer(examples["text"])
         if self.tokenizer.is_fast:
             result["word_ids"] = [result.word_ids(i) for i in range(len(result["input_ids"]))]
@@ -61,6 +62,11 @@ class FTDataset():
         return result
     
     def whole_word_masking_data_collator(self, features, wwm_probability = 0.2):
+
+        '''
+        Data collator for whole word masking of input sequence.
+        '''
+
         for feature in features:
             word_ids = feature.pop("word_ids")
 
