@@ -273,6 +273,8 @@ def get_results(input_file,output_file,model,tokenizer,lm_model='bert'):
                                       })],ignore_index=True)
 
     df_score.to_csv(output_file)
+
+
     print('=' * 100)
     print('Total examples:', N)
     print('Metric score:', round((stereo_score + antistereo_score) / N * 100, 2))
@@ -282,6 +284,14 @@ def get_results(input_file,output_file,model,tokenizer,lm_model='bert'):
     print("Num. neutral:", neutral, round(neutral / N * 100, 2))
     print('=' * 100)
     print()
+
+    return {
+        'total_examples' : [N],
+        'metric_score' : [round((stereo_score + antistereo_score) / N * 100, 2)],
+        'stereotype_score' : [round(stereo_score  / total_stereo * 100, 2)],
+        'anti-stereotype_score:' : [round(antistereo_score  / total_antistereo * 100, 2)],
+        'num_neutral' : [neutral]
+    }
 
 
 # parser = argparse.ArgumentParser()
