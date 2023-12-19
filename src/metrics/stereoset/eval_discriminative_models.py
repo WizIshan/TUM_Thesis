@@ -72,7 +72,7 @@ class BiasEvaluator():
                  intersentence_load_path=None, intrasentence_load_path=None, skip_intrasentence=False,
                  skip_intersentence=True, batch_size=1, max_seq_length=128, 
                  output_dir="predictions/", output_file="predictions.json"):
-        print(f"Loading {input_file}...")
+        # print(f"Loading {input_file}...")
         self.input_file = input_file
         filename = os.path.abspath(input_file)
         self.dataloader = StereoSet(filename)
@@ -107,23 +107,23 @@ class BiasEvaluator():
         self.INTRASENTENCE_MODEL = intrasentence_model
         self.INTERSENTENCE_MODEL = intersentence_model
 
-        print("---------------------------------------------------------------")
-        print(
-            f"{Fore.LIGHTCYAN_EX}                     ARGUMENTS                 {Style.RESET_ALL}")
-        print(
-            f"{Fore.LIGHTCYAN_EX}Pretrained class:{Style.RESET_ALL} {pretrained_class}")
-        print(f"{Fore.LIGHTCYAN_EX}Mask Token:{Style.RESET_ALL} {self.MASK_TOKEN}")
-        print(f"{Fore.LIGHTCYAN_EX}Tokenizer:{Style.RESET_ALL} {tokenizer}")
-        print(
-            f"{Fore.LIGHTCYAN_EX}Skip Intrasentence:{Style.RESET_ALL} {self.SKIP_INTRASENTENCE}")
-        print(
-            f"{Fore.LIGHTCYAN_EX}Intrasentence Model:{Style.RESET_ALL} {self.INTRASENTENCE_MODEL}")
-        print(
-            f"{Fore.LIGHTCYAN_EX}Skip Intersentence:{Style.RESET_ALL} {self.SKIP_INTERSENTENCE}")
-        print(
-            f"{Fore.LIGHTCYAN_EX}Intersentence Model:{Style.RESET_ALL} {self.INTERSENTENCE_MODEL}")
-        print(f"{Fore.LIGHTCYAN_EX}CUDA:{Style.RESET_ALL} {self.cuda}")
-        print("---------------------------------------------------------------")
+        # print("---------------------------------------------------------------")
+        # print(
+        #     f"{Fore.LIGHTCYAN_EX}                     ARGUMENTS                 {Style.RESET_ALL}")
+        # print(
+        #     f"{Fore.LIGHTCYAN_EX}Pretrained class:{Style.RESET_ALL} {pretrained_class}")
+        # print(f"{Fore.LIGHTCYAN_EX}Mask Token:{Style.RESET_ALL} {self.MASK_TOKEN}")
+        # print(f"{Fore.LIGHTCYAN_EX}Tokenizer:{Style.RESET_ALL} {tokenizer}")
+        # print(
+        #     f"{Fore.LIGHTCYAN_EX}Skip Intrasentence:{Style.RESET_ALL} {self.SKIP_INTRASENTENCE}")
+        # print(
+        #     f"{Fore.LIGHTCYAN_EX}Intrasentence Model:{Style.RESET_ALL} {self.INTRASENTENCE_MODEL}")
+        # print(
+        #     f"{Fore.LIGHTCYAN_EX}Skip Intersentence:{Style.RESET_ALL} {self.SKIP_INTERSENTENCE}")
+        # print(
+        #     f"{Fore.LIGHTCYAN_EX}Intersentence Model:{Style.RESET_ALL} {self.INTERSENTENCE_MODEL}")
+        # print(f"{Fore.LIGHTCYAN_EX}CUDA:{Style.RESET_ALL} {self.cuda}")
+        # print("---------------------------------------------------------------")
 
     def evaluate_intrasentence(self):
         # model = getattr(models, self.INTRASENTENCE_MODEL)(
@@ -131,13 +131,13 @@ class BiasEvaluator():
         model = self.INTRASENTENCE_MODEL.to(self.device)
 
         if torch.cuda.device_count() > 1:
-            print("Let's use", torch.cuda.device_count(), "GPUs!")
+            # print("Let's use", torch.cuda.device_count(), "GPUs!")
             model = nn.DataParallel(model)
         model.eval()
 
-        print()
-        print(
-            f"{Fore.LIGHTRED_EX}Evaluating bias on intrasentence tasks...{Style.RESET_ALL}")
+        # print()
+        # print(
+        #     f"{Fore.LIGHTRED_EX}Evaluating bias on intrasentence tasks...{Style.RESET_ALL}")
 
         # if self.INTRASENTENCE_LOAD_PATH:
         #     state_dict = torch.load(self.INTRASENTENCE_LOAD_PATH)
@@ -187,54 +187,54 @@ class BiasEvaluator():
     def count_parameters(self, model):
         return sum(p.numel() for p in model.parameters() if p.requires_grad)
 
-    def evaluate_intersentence(self):
-        print()
-        print(
-            f"{Fore.LIGHTBLUE_EX}Evaluating bias on intersentence tasks...{Style.RESET_ALL}")
-        model = getattr(models, self.INTERSENTENCE_MODEL)(
-            self.PRETRAINED_CLASS).to(self.device)
+    # def evaluate_intersentence(self):
+    #     print()
+    #     print(
+    #         f"{Fore.LIGHTBLUE_EX}Evaluating bias on intersentence tasks...{Style.RESET_ALL}")
+    #     model = getattr(models, self.INTERSENTENCE_MODEL)(
+    #         self.PRETRAINED_CLASS).to(self.device)
 
-        print(f"Number of parameters: {self.count_parameters(model):,}")
-        print("Let's use", torch.cuda.device_count(), "GPUs!")
-        model = torch.nn.DataParallel(model)
+    #     print(f"Number of parameters: {self.count_parameters(model):,}")
+    #     print("Let's use", torch.cuda.device_count(), "GPUs!")
+    #     model = torch.nn.DataParallel(model)
 
-        if self.INTERSENTENCE_LOAD_PATH:
-            model.load_state_dict(torch.load(self.INTERSENTENCE_LOAD_PATH))
+    #     if self.INTERSENTENCE_LOAD_PATH:
+    #         model.load_state_dict(torch.load(self.INTERSENTENCE_LOAD_PATH))
 
-        model.eval()
-        dataset = IntersentenceDataset(self.tokenizer, args)
-        # TODO: test this on larger batch sizes.
-        assert args.batch_size == 1
-        dataloader = DataLoader(dataset, shuffle=True, num_workers=0)
+    #     model.eval()
+    #     dataset = IntersentenceDataset(self.tokenizer, args)
+    #     # TODO: test this on larger batch sizes.
+    #     assert args.batch_size == 1
+    #     dataloader = DataLoader(dataset, shuffle=True, num_workers=0)
 
-        if args.no_cuda:
-            n_cpus = cpu_count()
-            print(f"Using {n_cpus} cpus!")
-            predictions = Parallel(n_jobs=n_cpus, backend="multiprocessing")(delayed(process_job)(
-                batch, model, self.PRETRAINED_CLASS) for batch in tqdm(dataloader, total=len(dataloader)))
-        else:
-            predictions = []
+    #     if args.no_cuda:
+    #         n_cpus = cpu_count()
+    #         print(f"Using {n_cpus} cpus!")
+    #         predictions = Parallel(n_jobs=n_cpus, backend="multiprocessing")(delayed(process_job)(
+    #             batch, model, self.PRETRAINED_CLASS) for batch in tqdm(dataloader, total=len(dataloader)))
+    #     else:
+    #         predictions = []
 
-            for batch_num, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
-                input_ids, token_type_ids, attention_mask, sentence_id = batch
-                input_ids = input_ids.to(self.device)
-                token_type_ids = token_type_ids.to(self.device)
-                attention_mask = attention_mask.to(self.device)
-                outputs = model(input_ids, token_type_ids=token_type_ids)
-                if type(outputs) == tuple:
-                    outputs = outputs[0]
-                outputs = torch.softmax(outputs, dim=1)
+    #         for batch_num, batch in tqdm(enumerate(dataloader), total=len(dataloader)):
+    #             input_ids, token_type_ids, attention_mask, sentence_id = batch
+    #             input_ids = input_ids.to(self.device)
+    #             token_type_ids = token_type_ids.to(self.device)
+    #             attention_mask = attention_mask.to(self.device)
+    #             outputs = model(input_ids, token_type_ids=token_type_ids)
+    #             if type(outputs) == tuple:
+    #                 outputs = outputs[0]
+    #             outputs = torch.softmax(outputs, dim=1)
 
-                for idx in range(input_ids.shape[0]):
-                    probabilities = {}
-                    probabilities['id'] = sentence_id[idx]
-                    if "bert" == self.PRETRAINED_CLASS[:4] or "roberta-base" == self.PRETRAINED_CLASS:
-                        probabilities['score'] = outputs[idx, 0].item()
-                    else:
-                        probabilities['score'] = outputs[idx, 1].item()
-                    predictions.append(probabilities)
+    #             for idx in range(input_ids.shape[0]):
+    #                 probabilities = {}
+    #                 probabilities['id'] = sentence_id[idx]
+    #                 if "bert" == self.PRETRAINED_CLASS[:4] or "roberta-base" == self.PRETRAINED_CLASS:
+    #                     probabilities['score'] = outputs[idx, 0].item()
+    #                 else:
+    #                     probabilities['score'] = outputs[idx, 1].item()
+    #                 predictions.append(probabilities)
 
-        return predictions
+    #     return predictions
 
     def evaluate(self):
         bias = {}
@@ -283,7 +283,7 @@ def getStereoSet(**kwargs):
         pretrained_class =  'bert-base-cased', tokenizer = 'BertTokenizer', intrasentence_model =  'BertLM', input_file = None, output_dir = None 
     '''
     # args= parse_args()
-    print(kwargs)
+    # print(kwargs)
     # return
     evaluator = BiasEvaluator(**kwargs)
     results = evaluator.evaluate()
@@ -297,4 +297,4 @@ def getStereoSet(**kwargs):
     with open(output_file, "w+") as f:
         json.dump(results, f, indent=2)
 
-    evaluate_results(kwargs['input_file'],output_file,kwargs['output_dir'])
+    return evaluate_results(kwargs['input_file'],output_file,kwargs['output_dir'])

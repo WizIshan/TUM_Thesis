@@ -33,7 +33,11 @@ class FineTuner():
         self.model_checkpoint = model_name
         self.model = None
         self.tokenizer = None
-
+        self.model_tag = model_name
+        if(from_local):
+            self.model_dir = local_model_path
+        else:
+            self.model_dir = model_save_dir
         if(self.model_checkpoint == None):
             print("No Model name specified!")
         else:
@@ -70,7 +74,7 @@ class FineTuner():
         '''
         return self.tokenizer
 
-    def finetune_model(self, dataset_name = None):
+    def finetune_model(self, dataset_name = None, model_save_dir = None):
 
         '''
         This function fine tunes the chosen model on the dataset specified by the user.
@@ -80,6 +84,11 @@ class FineTuner():
             print("Did not specify the name of dataset!")
             return
         
+        ## Modify model tag
+        self.model_tag = self.model_tag + '_FT_' + dataset_name
+        if(model_save_dir):
+            self.model_save_dir = model_save_dir
+
         data_collator = DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm_probability=0.15)
 
         data = FTDataset(dataset_name,self.model,self.tokenizer)

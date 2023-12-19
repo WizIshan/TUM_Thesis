@@ -160,32 +160,26 @@ def evaluate_results(gold_file, predictions_file,predictions_dir):
     score_evaluator = ScoreEvaluator(
         gold_file_path=gold_file, predictions_file_path=predictions_file)
     overall = score_evaluator.get_overall_results()
-    score_evaluator.pretty_print(overall)
+    # print(overall)
+    # # score_evaluator.pretty_print(overall)
 
-    
-    # if predictions_dir!=None:
-    #     if predictions_dir[-1]=="/":
-    #         predictions_dir = predictions_dir[:-1]
-    #     output_file = f"{predictions_dir}.json"
-    # else:
-    #     output_file = "results.json"
-
-    # if os.path.exists(output_file):
-    #     with open(output_file, "r") as f:
-    #         d = json.load(f)
-    # else:
     d = {}
     output_file = os.path.join(predictions_dir, 'ss_results.txt')
-    # assuming the file follows a format of "predictions_{MODELNAME}.json"
-    # predictions_filename = os.path.basename(predictions_file)
-    # if "predictions_" in predictions_filename: 
-    #     pretrained_class = predictions_filename.split("_")[1]
-    #     d[pretrained_class] = overall
-    # else:
     d = overall
 
     with open(output_file, "w+") as f:
         json.dump(d, f, indent=2)
+
+    overall = overall['intrasentence']
+    formatted = {'category' : [],'Count' : [],'LM Score' : [], 'SS Score' : [], 'ICAT Score' : []}
+    for ovkey in overall.keys():
+        formatted['category'].append(ovkey)
+        formatted['Count'].append(overall[ovkey]['Count'])
+        formatted['LM Score'].append(overall[ovkey]['LM Score'])
+        formatted['SS Score'].append(overall[ovkey]['SS Score'])
+        formatted['ICAT Score'].append(overall[ovkey]['ICAT Score'])
+    
+    return formatted
 
 # if __name__ == "__main__":
 #     args = parse_args()
