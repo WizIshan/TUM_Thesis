@@ -3,7 +3,7 @@ import torch.nn as nn
 
 import transformers
 
-from transformers import pipeline, AutoModelForMaskedLM, AutoTokenizer, DataCollatorForLanguageModeling, default_data_collator, TrainingArguments, Trainer
+from transformers import pipeline, AutoModelForMaskedLM, AutoTokenizer, AutoConfig, DataCollatorForLanguageModeling, default_data_collator, TrainingArguments, Trainer
 
 from datasets import load_dataset
 import evaluate
@@ -24,7 +24,7 @@ class FineTuner():
     the user provided dataset.
     '''
 
-    def __init__(self,model_name = None, from_local = False, local_model_path = None, model_save_dir = None):
+    def __init__(self,model_name = None, from_local = False, local_model_path = None, model_save_dir = None, random_init = False, **kwargs):
 
         '''
         Initializes local variables for the class FineTuner 
@@ -34,16 +34,52 @@ class FineTuner():
         self.model = None
         self.tokenizer = None
         self.model_tag = model_name
-        if(from_local):
-            self.model_dir = local_model_path
-        else:
-            self.model_dir = model_save_dir
+        self.model_save_dir = model_save_dir
+
         if(self.model_checkpoint == None):
             print("No Model name specified!")
+        
         else:
-            self.__initialize_model__(from_local,local_model_path)
 
-        self.model_save_dir = model_save_dir
+            if(random_init):
+                self.__random_initialize_model__()
+            else:
+                
+                if(from_local):
+                    self.model_dir = local_model_path
+                    self.model_tag = self.model_tag + '_FT_' + kwargs['ft_ds']
+                else:
+                    self.model_dir = model_save_dir
+                
+                self.__initialize_model__(from_local,local_model_path)
+
+        # if(from_local):
+        #     self.model_dir = local_model_path
+        #     self.model_tag = self.model_tag + '_FT_' + kwargs['ft_ds']
+        # else:
+        #     self.model_dir = model_save_dir
+        # if(self.model_checkpoint == None):
+        #     print("No Model name specified!")
+        # elif(random_init):
+        #     self.__random_initialize_model__()
+        # else:
+        #     self.__initialize_model__(from_local,local_model_path)
+
+        # self.model_save_dir = model_save_dir
+
+    def __random_initialize_model__(self):
+
+        '''
+        This function is used to randomly initialize the weights of the given model.
+        '''
+
+        self.model = AutoModelForMaskedLM.from_config(AutoConfig.from_pretrained(self.model_checkpoint))
+        self.tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint)
+
+        self.model_tag = self.model_tag + '_random_init'
+
+        print("Model Initialized with random weights!")
+
 
     def __initialize_model__(self,from_local,local_model_path):
 

@@ -164,8 +164,13 @@ class BiasEvaluator():
             mask_idxs = (input_ids == self.MASK_TOKEN_IDX)
 
             # get the probabilities
-            output = model(input_ids, attention_mask=attention_mask,
-                           token_type_ids=token_type_ids)[0].softmax(dim=-1)
+            if('distilbert' in self.PRETRAINED_CLASS):
+                output = model(input_ids, attention_mask=attention_mask)[0].softmax(dim=-1)
+            else:
+                output = model(input_ids, attention_mask=attention_mask,
+                            token_type_ids=token_type_ids)[0].softmax(dim=-1)
+
+            
 
             output = output[mask_idxs]
             output = output.index_select(1, next_token).diag()
