@@ -43,6 +43,7 @@ class FineTuner():
 
             if(random_init):
                 self.__random_initialize_model__()
+                self.model_dir = 'random init'
             else:
                 
                 if(from_local):
@@ -91,9 +92,11 @@ class FineTuner():
         if(from_local):
             self.model = AutoModelForMaskedLM.from_pretrained(local_model_path)
             self.tokenizer = AutoTokenizer.from_pretrained(local_model_path)
+            
         else:
             self.model = AutoModelForMaskedLM.from_pretrained(self.model_checkpoint)
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint)
+            self.model_dir = 'None'
         print("Model Initialized!")
     
     def getModel(self):

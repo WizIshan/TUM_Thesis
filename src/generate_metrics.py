@@ -13,6 +13,7 @@ import collections
 
 from metrics.crows_pairs import *
 from metrics.stereoset.eval_discriminative_models import *
+from metrics.ceat.ceat import *
 
 from datetime import datetime
 import os
@@ -58,6 +59,14 @@ class Metric():
                             input_file = input_file, 
                             output_dir = output_dir,
                             output_file = output_file )
+    
+    def __ceat_metric__(self, input_dir = None, output_dir = None, generate_new = False):
+
+        '''
+        Generates CEAT score for a given MLM
+        '''
+
+        return get_ceat(input_dir, output_dir, self.model,self.tokenizer, exp_name = self.model_tag, generate_new = generate_new)
         
 
     def save_metric(self, metric = None, score = None, file = None):
@@ -78,6 +87,8 @@ class Metric():
             cons_df['score'].append(score['metric_score'].values[0])
         elif(metric == 'stereoset'):
             cons_df['score'].append(score.loc[score['category']=='overall']['ICAT Score'].values[0])
+        elif(metric == 'ceat'):
+            cons_df['score'].append(score.loc[score['group']==0]['PES'].values[0])
         
         # print(pd.DataFrame(cons_df))
         cons_df = pd.DataFrame(cons_df)
@@ -109,7 +120,7 @@ class Metric():
 
         
 
-    def get_metric(self, metric = None, input_file = None, output_file = None, output_dir = None):
+    def get_metric(self, metric = None, input_file = None, output_file = None, output_dir = None, **kwargs):
 
         '''
         Returns metrics specified in the input. 
@@ -122,7 +133,12 @@ class Metric():
             self.save_metric(metric = 'crows-pairs', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
             score = self.__stereoset_metric__(input_file, output_file, output_dir)
             self.save_metric(metric = 'stereoset', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
-        
+
+            score = self.__ceat_metric__(kwargs['input_dir'], output_dir, kwargs['generate_new'])
+            self.save_metric(metric = 'ceat', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')   
+
+
+
         elif(metric == 'crows-pairs'):
 
             ## Call crows-pairs function
@@ -135,6 +151,12 @@ class Metric():
             score = self.__stereoset_metric__(input_file, output_file, output_dir)
             # print(score)
             self.save_metric(metric = 'stereoset', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
+
+        elif(metric == 'ceat'):
+
+            ##Call CEAT function
+            score = self.__ceat_metric__(kwargs['input_dir'], output_dir, kwargs['generate_new'])
+            self.save_metric(metric = 'ceat', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
         
         else:
 
