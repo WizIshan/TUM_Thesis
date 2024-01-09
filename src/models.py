@@ -127,6 +127,7 @@ class FineTuner():
         self.model_tag = self.model_tag + '_FT_' + dataset_name
         if(model_save_dir):
             self.model_save_dir = model_save_dir
+            self.model_dir = model_save_dir
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm_probability=0.15)
 

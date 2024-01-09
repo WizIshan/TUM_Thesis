@@ -1,7 +1,9 @@
 data/results/cp_results_fine_tuned.csv
 src/distilbert-base-uncased-finetuned-imdb
-src/bert.vocab
 data
 *.pyc
 *.csv
 src/bert-base-cased-finetuned-imdb
+src/tmux.py
+src/bert.vocab
+data/results/cp_results.csv

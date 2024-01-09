@@ -222,7 +222,7 @@ def ceat_meta(weat_groups = weat_groups, model='bert', exp_name = 'None', test=1
     for i in range(N):
 
 
-
+        # print()
         X = np.array([weat_dict[wd][np.random.randint(0,len(weat_dict[wd]))] for wd in weat_groups[test-1][0]])
         Y = np.array([weat_dict[wd][np.random.randint(0,len(weat_dict[wd]))] for wd in weat_groups[test-1][1]])
         A = np.array([weat_dict[wd][np.random.randint(0,len(weat_dict[wd]))] for wd in weat_groups[test-1][2]])
@@ -307,6 +307,8 @@ def get_ceat(input_dir,output_dir,model,tokenizer, exp_name, lm_model='bert', ge
 
 
     if(generate_new):
+        if((not os.path.exists(os.path.join(output_dir,exp_name)))):
+            os.mkdir(os.path.join(output_dir,exp_name))
         generate_ebd(input_dir,output_dir,model,tokenizer, exp_name)
 
 
@@ -321,7 +323,7 @@ def get_ceat(input_dir,output_dir,model,tokenizer, exp_name, lm_model='bert', ge
         p_lst.append([])
 
         pes,  p_value = ceat_meta(weat_groups = weat_groups, model='bert', exp_name = exp_name,test=e,N=1000,
-                                  input_dir = output_dir)
+                                  input_dir = os.path.join(output_dir,exp_name))
         print("PES is {}:".format(pes))
         # print("Var is {}:".format(v))
         print("P-value is {}:".format(p_value))

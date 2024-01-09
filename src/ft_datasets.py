@@ -100,13 +100,22 @@ class FTDataset():
         '''
         Generates the formatted dataset to use for fine-tuning.
         '''
+        if(self.dataset_name == 'imdb'):
 
-        dataset = load_dataset(self.dataset_name)
+            dataset = load_dataset(self.dataset_name)
+            # Use batched=True to activate fast multithreading!
+            tokenized_datasets = dataset.map(
+                self.tokenize_function, batched=True, remove_columns=["text", "label"]
+            )
+        
+        elif(self.dataset_name == '4chan'):
 
-        # Use batched=True to activate fast multithreading!
-        tokenized_datasets = dataset.map(
-            self.tokenize_function, batched=True, remove_columns=["text", "label"]
-        )
+            dataset = load_dataset("json", data_files="/home/bhatt/ishan/TUM_Thesis/data/ft_ds/4chan/pol-dataset.json")
+            # Use batched=True to activate fast multithreading!
+            tokenized_datasets = dataset.map(
+                self.tokenize_function, batched=True, remove_columns=['author', 'id', 'token_length', 'text']
+            )
+        
 
         lm_datasets = tokenized_datasets.map(self.group_texts, batched=True)
  

@@ -75,14 +75,17 @@ class Metric():
         Saves the bias metric in a common file with relevant details.
         '''
         ## Adding metadata for runs
+
+        ts = (datetime.now()).strftime("%Y-%m-%d %H:%M:%S")
+
         score = pd.DataFrame(score)
-        score['ts'] = (datetime.now()).strftime("%Y-%m-%d")
+        score['ts'] = ts
         score['model_name'] = self.model_tag
         score['model_dir'] = self.model_dir
         score['metric'] = metric
 
         ## Creating consolidated data
-        cons_df = {'ts' : [(datetime.now()).strftime("%Y-%m-%d")], 'model_tag' : [self.model_tag], 'model_dir' : [self.model_dir], 'metric' : [metric], 'score' : []}
+        cons_df = {'ts' : [ts], 'model_tag' : [self.model_tag], 'model_dir' : [self.model_dir], 'metric' : [metric], 'score' : []}
         if(metric == 'crows-pairs'):
             cons_df['score'].append(score['metric_score'].values[0])
         elif(metric == 'stereoset'):

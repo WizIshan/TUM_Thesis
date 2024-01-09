@@ -183,26 +183,35 @@ def bert(wd_lst,out_name, model_bert, tokenizer_bert, input_dir, output_dir, exp
     wd_idx_dict = {wd:[] for wd in wd_lst}
     out_dict = {wd:[] for wd in wd_lst}
     # out_dict = []
-    # error_sen_dict = {wd:[] for wd in wd_lst}
+    error_sen_dict = {wd:[] for wd in wd_lst}
 
     # generate wd index dictionary
     for wd in wd_lst:
         current_idx = torch.tensor(tokenizer_bert.encode(wd,add_special_tokens=False)).unsqueeze(0).tolist()[0]
+        # print(wd, current_idx)
+        # if(current_idx[0] == 8831):
+        #     print(wd)
         wd_idx_dict[wd] = current_idx
     
     # generate embeddings
     i = 0
     for wd in wd_lst:
+        # print(wd)
         target = wd_idx_dict[wd][-1]
-        tem = []
+        # tem = []
         for idx,sen in enumerate(sen_dict[wd]):
             i += 1
             if i%5000 == 0:
                 now = datetime.datetime.now()
-                print(now.strftime("%Y-%m-%d %H:%M:%S"))
-                print(str(i)+' finished.')
+                # print(now.strftime("%Y-%m-%d %H:%M:%S"))
+                # print(str(i)+' finished.')
             if idx == 1000:
                 break
+            
+            # print(sen)
+            sen = short_sen(sen,wd)
+            # print(sen)
+            
             # try:
             #     input_ids = torch.tensor(tokenizer_bert.encode(sen, add_special_tokens=False)).unsqueeze(0) 
             #     input_ids = input_ids.to('cuda')
@@ -211,19 +220,19 @@ def bert(wd_lst,out_name, model_bert, tokenizer_bert, input_dir, output_dir, exp
             #     exact_state_vector = outputs[0][0,int(exact_idx),:].cpu().detach().numpy() 
             #     out_dict[wd].append(exact_state_vector)
             # except:
-            #     # error_sen_dict[wd].append(sen)
+            #     error_sen_dict[wd].append(sen)
 
-            sen = short_sen(sen,wd)
+            # print(torch.tensor(tokenizer_bert.encode('aster',add_special_tokens=False)).unsqueeze(0).tolist()[0])
             input_ids = torch.tensor(tokenizer_bert.encode(sen, add_special_tokens=False)).unsqueeze(0) 
             input_ids = input_ids.to('cuda')
-            
+            # print(input_ids)
             exact_idx = input_ids.tolist()[0].index(target)
             outputs = model_bert(input_ids)
             exact_state_vector = outputs[0][0,int(exact_idx),:].cpu().detach().numpy()  
             out_dict[wd].append(exact_state_vector)
         # out_dict.append(tem)
     n = exp_name+out_name+'.pickle'
-    pickle.dump(out_dict,open(os.path.join(output_dir,n),'wb'))
+    pickle.dump(out_dict,open(os.path.join(os.path.join(output_dir,exp_name),n),'wb'))
     # pickle.dump(error_sen_dict,open('bert_error_sen.pickle','wb'))
 
 
