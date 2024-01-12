@@ -54,19 +54,6 @@ class FineTuner():
                 
                 self.__initialize_model__(from_local,local_model_path)
 
-        # if(from_local):
-        #     self.model_dir = local_model_path
-        #     self.model_tag = self.model_tag + '_FT_' + kwargs['ft_ds']
-        # else:
-        #     self.model_dir = model_save_dir
-        # if(self.model_checkpoint == None):
-        #     print("No Model name specified!")
-        # elif(random_init):
-        #     self.__random_initialize_model__()
-        # else:
-        #     self.__initialize_model__(from_local,local_model_path)
-
-        # self.model_save_dir = model_save_dir
 
     def __random_initialize_model__(self):
 
