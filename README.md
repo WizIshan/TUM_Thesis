@@ -1,6 +1,12 @@
 # TUM_Thesis
 ## Studying Bias with Contextual Embeddings- The Influence of Pretraining and Finetuning
 
+To install libraries use
+
+```
+pip install -r requirments.txt
+```
+
 
 To generate results run main.ipynb.
 viz.ipynb is used to generate visualizations from the generated results.

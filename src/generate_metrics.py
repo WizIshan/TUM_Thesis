@@ -11,7 +11,7 @@ import pandas as pd
 import numpy as np
 import collections
 
-from metrics.crows_pairs import *
+from metrics.crowspairs.crows_pairs import *
 from metrics.stereoset.eval_discriminative_models import *
 from metrics.ceat.ceat import *
 
