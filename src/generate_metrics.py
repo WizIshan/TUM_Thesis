@@ -17,6 +17,7 @@ from metrics.ceat.ceat import *
 
 from datetime import datetime
 import os
+from paths import *
 
 
 class Metric():
@@ -25,7 +26,7 @@ class Metric():
     This class is used for generating the metrics for a given MLM.
     '''
 
-    def __init__(self, model_name = None , model = None, tokenizer = None, model_tag = None, model_dir = None) -> None:
+    def __init__(self, model_name = None , model = None, tokenizer = None, model_tag = None, model_dir = None, results_file = 'master_results.xlsx') -> None:
         
         '''
         Initializes variables for the Metric class.
@@ -36,7 +37,7 @@ class Metric():
         self.model_name = model_name
         self.model_tag = model_tag
         self.model_dir = model_dir
-        self.results_file = None
+        self.results_file = os.path.join(RESULTS_PATH,results_file)
 
 
     def __crows_pair_metric__(self, input_file = None, output_file = None, output_dir = None):
@@ -134,12 +135,12 @@ class Metric():
 
             ## Call all functions one by one
             score = self.__crows_pair_metric__(input_file, output_file)
-            self.save_metric(metric = 'crows-pairs', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
+            self.save_metric(metric = 'crows-pairs', score = score, file = self.results_file)
             score = self.__stereoset_metric__(input_file, output_file, output_dir)
-            self.save_metric(metric = 'stereoset', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
+            self.save_metric(metric = 'stereoset', score = score, file = self.results_file)
 
             score = self.__ceat_metric__(kwargs['input_dir'], output_dir, kwargs['generate_new'])
-            self.save_metric(metric = 'ceat', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')   
+            self.save_metric(metric = 'ceat', score = score, file = self.results_file)   
 
 
 
@@ -147,20 +148,20 @@ class Metric():
 
             ## Call crows-pairs function
             score = self.__crows_pair_metric__(input_file, output_file)
-            self.save_metric(metric = 'crows-pairs', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
+            self.save_metric(metric = 'crows-pairs', score = score, file = self.results_file)
 
         elif(metric == 'stereoset'):
 
             ## Call stereoset function
             score = self.__stereoset_metric__(input_file, output_file, output_dir)
             # print(score)
-            self.save_metric(metric = 'stereoset', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
+            self.save_metric(metric = 'stereoset', score = score, file = self.results_file)
 
         elif(metric == 'ceat'):
 
             ##Call CEAT function
             score = self.__ceat_metric__(kwargs['input_dir'], output_dir, kwargs['generate_new'])
-            self.save_metric(metric = 'ceat', score = score, file = '/home/bhatt/ishan/TUM_Thesis/data/results/master_results.xlsx')
+            self.save_metric(metric = 'ceat', score = score, file = self.results_file)
         
         else:
 

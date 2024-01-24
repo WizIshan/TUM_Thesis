@@ -9,10 +9,12 @@ from datasets import load_dataset
 import evaluate
 
 import random
-
+import os
 import pandas as pd
 import numpy as np
 import collections
+
+from paths import *
 
 
 class FTDataset():
@@ -110,7 +112,7 @@ class FTDataset():
         
         elif(self.dataset_name == '4chan'):
 
-            dataset = load_dataset("json", data_files="/home/bhatt/ishan/TUM_Thesis/data/ft_ds/4chan/pol-dataset.json",streaming=True)
+            dataset = load_dataset("json", data_files=FT_4CHAN_PATH)
             # Use batched=True to activate fast multithreading!
             tokenized_datasets = dataset.map(
                 self.tokenize_function, batched=True, remove_columns=['author', 'id', 'token_length', 'text']

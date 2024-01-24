@@ -9,12 +9,13 @@ from datasets import load_dataset
 import evaluate
 
 import random
-
+import os
 import pandas as pd
 import numpy as np
 import collections
-
+from datetime import datetime
 from ft_datasets import FTDataset
+from paths import *
 
 
 class FineTuner():
@@ -24,7 +25,7 @@ class FineTuner():
     the user provided dataset.
     '''
 
-    def __init__(self,model_name = None, from_local = False, local_model_path = None, model_save_dir = None, random_init = False, **kwargs):
+    def __init__(self,model_name = None, from_local = False, local_model_path = None, random_init = False, **kwargs):
 
         '''
         Initializes local variables for the class FineTuner 
@@ -34,7 +35,7 @@ class FineTuner():
         self.model = None
         self.tokenizer = None
         self.model_tag = model_name
-        self.model_save_dir = model_save_dir
+        # self.model_save_dir = model_save_dir
 
         if(self.model_checkpoint == None):
             print("No Model name specified!")
@@ -50,7 +51,7 @@ class FineTuner():
                     self.model_dir = local_model_path
                     self.model_tag = self.model_tag + '_FT_' + kwargs['ft_ds']
                 else:
-                    self.model_dir = model_save_dir
+                    self.model_dir = None
                 
                 self.__initialize_model__(from_local,local_model_path)
 
@@ -83,9 +84,21 @@ class FineTuner():
         else:
             self.model = AutoModelForMaskedLM.from_pretrained(self.model_checkpoint)
             self.tokenizer = AutoTokenizer.from_pretrained(self.model_checkpoint)
-            self.model_dir = 'None'
+            # self.model_dir = 'None'
         print("Model Initialized!")
     
+    def save_model(self):
+
+        '''
+        This function is used to save the model parameters locally.
+        '''
+        model_path = os.path.join(MODELS_PATH,(self.model_tag+ "_"+(datetime.now()).strftime("%Y-%m-%d")))
+        print("Model saved in : ", model_path)
+
+        self.model.save_pretrained(model_path)
+
+
+
     def getModel(self):
 
         '''
@@ -112,9 +125,11 @@ class FineTuner():
         
         ## Modify model tag
         self.model_tag = self.model_tag + '_FT_' + dataset_name
-        if(model_save_dir):
-            self.model_save_dir = model_save_dir
-            self.model_dir = model_save_dir
+        # if(model_save_dir):
+        #     self.model_save_dir = model_save_dir
+        #     self.model_dir = model_save_dir
+        
+        model_save_dir = os.path.join(MODELS_PATH,(self.model_tag+ "_"+(datetime.now()).strftime("%Y-%m-%d")))
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm_probability=0.15)
 
@@ -128,7 +143,7 @@ class FineTuner():
         logging_steps = len(downsampled_dataset["train"]) // batch_size
 
         training_args = TrainingArguments(
-            output_dir=self.model_save_dir,
+            output_dir = model_save_dir,
             overwrite_output_dir=True,
             evaluation_strategy="epoch",
             num_train_epochs = epochs,
@@ -144,6 +159,8 @@ class FineTuner():
         trainer = Trainer(
             model=self.model,
             args=training_args,
+            # train_dataset=downsampled_dataset["train"].with_format("torch"),
+            # eval_dataset=downsampled_dataset["test"].with_format("torch"),
             train_dataset=downsampled_dataset["train"],
             eval_dataset=downsampled_dataset["test"],
             data_collator=data_collator,
