@@ -1,3 +1,23 @@
+'''
+
+Based on the work done in StereoSet: Measuring stereotypical bias in pretrained language models
+
+@misc{nadeem2020stereoset,
+    title={StereoSet: Measuring stereotypical bias in pretrained language models},
+    author={Moin Nadeem and Anna Bethke and Siva Reddy},
+    year={2020},
+    eprint={2004.09456},
+    archivePrefix={arXiv},
+    primaryClass={cs.CL}
+}
+
+You can find the original repository at https://github.com/moinnadeem/StereoSet/tree/master
+
+The evaluate_results() function was modified for the purposes of this study.
+
+'''
+
+
 import os
 import json
 from glob import glob

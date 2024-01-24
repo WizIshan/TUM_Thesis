@@ -36,6 +36,7 @@ class Metric():
         self.model_name = model_name
         self.model_tag = model_tag
         self.model_dir = model_dir
+        self.results_file = None
 
 
     def __crows_pair_metric__(self, input_file = None, output_file = None, output_dir = None):

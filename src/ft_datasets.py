@@ -110,7 +110,7 @@ class FTDataset():
         
         elif(self.dataset_name == '4chan'):
 
-            dataset = load_dataset("json", data_files="/home/bhatt/ishan/TUM_Thesis/data/ft_ds/4chan/pol-dataset.json")
+            dataset = load_dataset("json", data_files="/home/bhatt/ishan/TUM_Thesis/data/ft_ds/4chan/pol-dataset.json",streaming=True)
             # Use batched=True to activate fast multithreading!
             tokenized_datasets = dataset.map(
                 self.tokenize_function, batched=True, remove_columns=['author', 'id', 'token_length', 'text']

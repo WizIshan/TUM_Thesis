@@ -100,7 +100,7 @@ class FineTuner():
         '''
         return self.tokenizer
 
-    def finetune_model(self, dataset_name = None, model_save_dir = None):
+    def finetune_model(self, dataset_name = None, model_save_dir = None, epochs = 10, train_size = 10_000):
 
         '''
         This function fine tunes the chosen model on the dataset specified by the user.
@@ -118,7 +118,7 @@ class FineTuner():
 
         data_collator = DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm_probability=0.15)
 
-        data = FTDataset(dataset_name,self.model,self.tokenizer)
+        data = FTDataset(dataset_name,self.model,self.tokenizer,train_size)
         downsampled_dataset = data.generate_dataset()
         
         ## Create the dataset and format it for training
@@ -131,7 +131,7 @@ class FineTuner():
             output_dir=self.model_save_dir,
             overwrite_output_dir=True,
             evaluation_strategy="epoch",
-            num_train_epochs = 10,
+            num_train_epochs = epochs,
             learning_rate=2e-5,
             weight_decay=0.01,
             per_device_train_batch_size=batch_size,

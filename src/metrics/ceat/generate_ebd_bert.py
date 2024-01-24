@@ -1,3 +1,27 @@
+'''
+Based on the work done in Detecting Emergent Intersectional Biases: Contextualized Word Embeddings Contain a Distribution of Human-like Biases
+
+@inproceedings{Guo_2021, series={AIES ’21},
+   title={Detecting Emergent Intersectional Biases: Contextualized Word Embeddings Contain a Distribution of Human-like Biases},
+   url={http://dx.doi.org/10.1145/3461702.3462536},
+   DOI={10.1145/3461702.3462536},
+   booktitle={Proceedings of the 2021 AAAI/ACM Conference on AI, Ethics, and Society},
+   publisher={ACM},
+   author={Guo, Wei and Caliskan, Aylin},
+   year={2021},
+   month=jul, collection={AIES ’21} }
+
+
+You can find the original repository at https://github.com/weiguowilliam/CEAT/tree/master
+
+For the purposes of this study we have the generate_ebd() function..
+Some small changes were made so that the results generated are not written to files but instead passed as outputs via our custom function.
+
+'''
+
+
+
+
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 import torch
