@@ -49,7 +49,13 @@ class FineTuner():
                 
                 if(from_local):
                     self.model_dir = local_model_path
-                    self.model_tag = self.model_tag + '_FT_' + kwargs['ft_ds']
+                    # self.model_tag = self.model_tag + '_FT_' + kwargs['ft_ds']
+                    if('random' in self.model_dir):
+                        self.model_tag = self.model_tag + '_random_init'
+                    if('FT' in self.model_dir):
+                        self.model_tag = self.model_tag + '_FT_' + kwargs['ft_ds']
+
+
                 else:
                     self.model_dir = None
                 
@@ -92,10 +98,12 @@ class FineTuner():
         '''
         This function is used to save the model parameters locally.
         '''
-        model_path = os.path.join(MODELS_PATH,(self.model_tag+ "_"+(datetime.now()).strftime("%Y-%m-%d")))
+        model_path = os.path.join(MODELS_PATH,(self.model_tag+ "_"+(datetime.now()).strftime("%Y-%m-%d-%H-%M-%S")))
         print("Model saved in : ", model_path)
+        self.model_dir = model_path
 
         self.model.save_pretrained(model_path)
+        self.tokenizer.save_pretrained(model_path)
 
 
 
@@ -113,7 +121,7 @@ class FineTuner():
         '''
         return self.tokenizer
 
-    def finetune_model(self, dataset_name = None, model_save_dir = None, epochs = 10, train_size = 10_000):
+    def finetune_model(self, dataset_name = None, model_save_dir = None, epochs = 20, train_size = 10_000):
 
         '''
         This function fine tunes the chosen model on the dataset specified by the user.
@@ -129,8 +137,8 @@ class FineTuner():
         #     self.model_save_dir = model_save_dir
         #     self.model_dir = model_save_dir
         
-        model_save_dir = os.path.join(MODELS_PATH,(self.model_tag+ "_"+(datetime.now()).strftime("%Y-%m-%d")))
-
+        model_save_dir = os.path.join(MODELS_PATH,(self.model_tag+ "_"+(datetime.now()).strftime("%Y-%m-%d-%H-%M-%S")))
+        self.model_dir = model_save_dir
         data_collator = DataCollatorForLanguageModeling(tokenizer=self.tokenizer, mlm_probability=0.15)
 
         data = FTDataset(dataset_name,self.model,self.tokenizer,train_size)
@@ -154,6 +162,9 @@ class FineTuner():
             push_to_hub=False,
             fp16=True,
             logging_steps=logging_steps,
+            save_strategy = "steps",
+            # save_only_model = True
+            save_steps = logging_steps * 5 ## Save after every 5 epochs,
         )
 
         trainer = Trainer(

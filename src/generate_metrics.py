@@ -26,7 +26,7 @@ class Metric():
     This class is used for generating the metrics for a given MLM.
     '''
 
-    def __init__(self, model_name = None , model = None, tokenizer = None, model_tag = None, model_dir = None, results_file = 'master_results.xlsx') -> None:
+    def __init__(self, model_name = None , model = None, tokenizer = None, model_tag = None, model_dir = None, results_file = 'master_results.xlsx', ft_epochs = None) -> None:
         
         '''
         Initializes variables for the Metric class.
@@ -38,6 +38,7 @@ class Metric():
         self.model_tag = model_tag
         self.model_dir = model_dir
         self.results_file = os.path.join(RESULTS_PATH,results_file)
+        self.ft_epochs = ft_epochs
 
 
     def __crows_pair_metric__(self, input_file = None, output_file = None, output_dir = None):
@@ -85,9 +86,10 @@ class Metric():
         score['model_name'] = self.model_tag
         score['model_dir'] = self.model_dir
         score['metric'] = metric
+        score['ft_epochs'] = self.ft_epochs
 
         ## Creating consolidated data
-        cons_df = {'ts' : [ts], 'model_tag' : [self.model_tag], 'model_dir' : [self.model_dir], 'metric' : [metric], 'score' : []}
+        cons_df = {'ts' : [ts], 'model_tag' : [self.model_tag], 'model_dir' : [self.model_dir], 'ft_epochs' : [self.ft_epochs], 'metric' : [metric], 'score' : []}
         if(metric == 'crows-pairs'):
             cons_df['score'].append(score['metric_score'].values[0])
         elif(metric == 'stereoset'):
