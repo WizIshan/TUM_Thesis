@@ -9,7 +9,10 @@ pip install -r requirments.txt
 
 Set the current working directory in paths.py 
 
+For fine-tuning models use finetune.ipynb
+
 To generate results run main.ipynb.
+
 plots.ipynb is used to generate visualizations from the generated results.
 
 The data directory structure should be as follows : 
