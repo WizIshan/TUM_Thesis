@@ -1,6 +1,6 @@
 
 ## Root directory (Set this as the current working directory before running any code)
-CURRENT_WD = '/home/bhatt/ishan/TUM_Thesis/src'
+CURRENT_WD = ''  ## Add the path to the src directory here. This will serve as the working directory for the entire project.
 
 ## Directory for saving models
 MODELS_PATH = '../data/models/'
