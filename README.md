@@ -7,9 +7,10 @@ To install libraries use
 pip install -r requirments.txt
 ```
 
+Set the current working directory in paths.py 
 
 To generate results run main.ipynb.
-viz.ipynb is used to generate visualizations from the generated results.
+plots.ipynb is used to generate visualizations from the generated results.
 
 The data directory structure should be as follows : 
 
@@ -18,7 +19,11 @@ data/
  - ft_ds
  - models
  - metrics_ds
+    - ceat
+    - crows-pairs
+    - stereoset
  - results
+    - ceat
 
 ```
 
